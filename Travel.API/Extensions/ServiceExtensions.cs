@@ -33,4 +33,27 @@ public static class ServiceExtensions
 
         return services;
     }
+
+    public static WebApplication MigrateDatabase(this WebApplication application)
+    {
+        using (var scope = application.Services.CreateScope())
+        {
+            using var dbContext =
+                scope.ServiceProvider.GetRequiredService<TravelPlannerDbContext>();
+
+            try
+            {
+                dbContext.Database.Migrate();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(
+                    $"Failed applying DB migrations for DB {nameof(TravelPlannerDbContext)}",
+                    ex
+                );
+            }
+        }
+
+        return application;
+    }
 }
